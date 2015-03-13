@@ -30,7 +30,8 @@ All text above, and the splash screen below must be included in any redistributi
 #include "Adafruit_PCD8544.h"
 
 // the memory buffer for the LCD
-uint8_t pcd8544_buffer[LCDWIDTH * LCDHEIGHT / 8] = {
+/*
+uint8_t pcd8544_buffer[PCD8544_LCDWIDTH * PCD8544_LCDHEIGHT / 8] = {
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC, 0xFC, 0xFE, 0xFF, 0xFC, 0xE0,
@@ -64,7 +65,7 @@ uint8_t pcd8544_buffer[LCDWIDTH * LCDHEIGHT / 8] = {
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
 };
-
+*/
 
 // reduces how much is refreshed, which speeds it up!
 // originally derived from Steve Evans/JCW's mod but cleaned up and
@@ -87,7 +88,7 @@ static void updateBoundingBox(uint8_t xmin, uint8_t ymin, uint8_t xmax, uint8_t 
 }
 
 Adafruit_PCD8544::Adafruit_PCD8544(int8_t SCLK, int8_t DIN, int8_t DC,
-    int8_t CS, int8_t RST) : Adafruit_GFX(LCDWIDTH, LCDHEIGHT) {
+    int8_t CS, int8_t RST) : Adafruit_GFX(PCD8544_LCDWIDTH, PCD8544_LCDHEIGHT) {
   _din = DIN;
   _sclk = SCLK;
   _dc = DC;
@@ -96,7 +97,7 @@ Adafruit_PCD8544::Adafruit_PCD8544(int8_t SCLK, int8_t DIN, int8_t DC,
 }
 
 Adafruit_PCD8544::Adafruit_PCD8544(int8_t SCLK, int8_t DIN, int8_t DC,
-    int8_t RST) : Adafruit_GFX(LCDWIDTH, LCDHEIGHT) {
+    int8_t RST) : Adafruit_GFX(PCD8544_LCDWIDTH, PCD8544_LCDHEIGHT) {
   _din = DIN;
   _sclk = SCLK;
   _dc = DC;
@@ -105,7 +106,7 @@ Adafruit_PCD8544::Adafruit_PCD8544(int8_t SCLK, int8_t DIN, int8_t DC,
 }
 
 Adafruit_PCD8544::Adafruit_PCD8544(int8_t DC, int8_t CS, int8_t RST):
-  Adafruit_GFX(LCDWIDTH, LCDHEIGHT) {
+  Adafruit_GFX(PCD8544_LCDWIDTH, PCD8544_LCDHEIGHT) {
   // -1 for din and sclk specify using hardware SPI
   _din = -1;
   _sclk = -1;
@@ -114,6 +115,9 @@ Adafruit_PCD8544::Adafruit_PCD8544(int8_t DC, int8_t CS, int8_t RST):
   _cs = CS;
 }
 
+void Adafruit_PCD8544::setBuffer(uint8_t *newBuff) {
+  pcd8544_buffer = newBuff;
+}
 
 // the most basic function, set a single pixel
 void Adafruit_PCD8544::drawPixel(int16_t x, int16_t y, uint16_t color) {
@@ -125,27 +129,27 @@ void Adafruit_PCD8544::drawPixel(int16_t x, int16_t y, uint16_t color) {
     case 1:
       t = x;
       x = y;
-      y =  LCDHEIGHT - 1 - t;
+      y =  PCD8544_LCDHEIGHT - 1 - t;
       break;
     case 2:
-      x = LCDWIDTH - 1 - x;
-      y = LCDHEIGHT - 1 - y;
+      x = PCD8544_LCDWIDTH - 1 - x;
+      y = PCD8544_LCDHEIGHT - 1 - y;
       break;
     case 3:
       t = x;
-      x = LCDWIDTH - 1 - y;
+      x = PCD8544_LCDWIDTH - 1 - y;
       y = t;
       break;
   }
 
-  if ((x < 0) || (x >= LCDWIDTH) || (y < 0) || (y >= LCDHEIGHT))
+  if ((x < 0) || (x >= PCD8544_LCDWIDTH) || (y < 0) || (y >= PCD8544_LCDHEIGHT))
     return;
 
   // x is which column
   if (color) 
-    pcd8544_buffer[x+ (y/8)*LCDWIDTH] |= _BV(y%8);  
+    pcd8544_buffer[x+ (y/8)*PCD8544_LCDWIDTH] |= _BV(y%8);  
   else
-    pcd8544_buffer[x+ (y/8)*LCDWIDTH] &= ~_BV(y%8); 
+    pcd8544_buffer[x+ (y/8)*PCD8544_LCDWIDTH] &= ~_BV(y%8); 
 
   updateBoundingBox(x,y,x,y);
 }
@@ -153,10 +157,10 @@ void Adafruit_PCD8544::drawPixel(int16_t x, int16_t y, uint16_t color) {
 
 // the most basic function, get a single pixel
 uint8_t Adafruit_PCD8544::getPixel(int8_t x, int8_t y) {
-  if ((x < 0) || (x >= LCDWIDTH) || (y < 0) || (y >= LCDHEIGHT))
+  if ((x < 0) || (x >= PCD8544_LCDWIDTH) || (y < 0) || (y >= PCD8544_LCDHEIGHT))
     return 0;
 
-  return (pcd8544_buffer[x+ (y/8)*LCDWIDTH] >> (y%8)) & 0x1;  
+  return (pcd8544_buffer[x+ (y/8)*PCD8544_LCDWIDTH] >> (y%8)) & 0x1;  
 }
 
 
@@ -222,7 +226,7 @@ void Adafruit_PCD8544::begin(uint8_t contrast, uint8_t bias) {
 
   // set up a bounding box for screen updates
 
-  updateBoundingBox(0, 0, LCDWIDTH-1, LCDHEIGHT-1);
+  updateBoundingBox(0, 0, PCD8544_LCDWIDTH-1, PCD8544_LCDHEIGHT-1);
   // Push out pcd8544_buffer to the Display (will show the AFI logo)
   display();
 }
@@ -301,7 +305,7 @@ void Adafruit_PCD8544::display(void) {
 #else
     // start at the beginning of the row
     col = 0;
-    maxcol = LCDWIDTH-1;
+    maxcol = PCD8544_LCDWIDTH-1;
 #endif
 
     command(PCD8544_SETXADDR | col);
@@ -310,7 +314,7 @@ void Adafruit_PCD8544::display(void) {
     if (_cs > 0)
       digitalWrite(_cs, LOW);
     for(; col <= maxcol; col++) {
-      spiWrite(pcd8544_buffer[(LCDWIDTH*p)+col]);
+      spiWrite(pcd8544_buffer[(PCD8544_LCDWIDTH*p)+col]);
     }
     if (_cs > 0)
       digitalWrite(_cs, HIGH);
@@ -319,9 +323,9 @@ void Adafruit_PCD8544::display(void) {
 
   command(PCD8544_SETYADDR );  // no idea why this is necessary but it is to finish the last byte?
 #ifdef enablePartialUpdate
-  xUpdateMin = LCDWIDTH - 1;
+  xUpdateMin = PCD8544_LCDWIDTH - 1;
   xUpdateMax = 0;
-  yUpdateMin = LCDHEIGHT-1;
+  yUpdateMin = PCD8544_LCDHEIGHT-1;
   yUpdateMax = 0;
 #endif
 
@@ -329,8 +333,8 @@ void Adafruit_PCD8544::display(void) {
 
 // clear everything
 void Adafruit_PCD8544::clearDisplay(void) {
-  memset(pcd8544_buffer, 0, LCDWIDTH*LCDHEIGHT/8);
-  updateBoundingBox(0, 0, LCDWIDTH-1, LCDHEIGHT-1);
+  memset(pcd8544_buffer, 0, PCD8544_LCDWIDTH*PCD8544_LCDHEIGHT/8);
+  updateBoundingBox(0, 0, PCD8544_LCDWIDTH-1, PCD8544_LCDHEIGHT-1);
   cursor_y = cursor_x = 0;
 }
 

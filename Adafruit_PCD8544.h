@@ -27,11 +27,11 @@ All text above, and the splash screen must be included in any redistribution
 
 #include <SPI.h>
 
-#define BLACK 1
-#define WHITE 0
+#define PCD8544_BLACK 1
+#define PCD8544_WHITE 0
 
-#define LCDWIDTH 84
-#define LCDHEIGHT 48
+#define PCD8544_LCDWIDTH 84
+#define PCD8544_LCDHEIGHT 48
 
 #define PCD8544_POWERDOWN 0x04
 #define PCD8544_ENTRYMODE 0x02
@@ -67,6 +67,8 @@ class Adafruit_PCD8544 : public Adafruit_GFX {
   // NOTE: MISO and SS will be set as an input and output respectively, so be careful sharing those pins!
   Adafruit_PCD8544(int8_t DC, int8_t CS, int8_t RST);
 
+  void setBuffer(uint8_t *newBuff);
+
   void begin(uint8_t contrast = 40, uint8_t bias = 0x04);
   
   void command(uint8_t c);
@@ -80,6 +82,7 @@ class Adafruit_PCD8544 : public Adafruit_GFX {
   uint8_t getPixel(int8_t x, int8_t y);
 
  private:
+  uint8_t *pcd8544_buffer;
   int8_t _din, _sclk, _dc, _rst, _cs;
   volatile uint8_t *mosiport, *clkport;
   uint8_t mosipinmask, clkpinmask;
